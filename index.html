@@ -928,74 +928,76 @@
             
             const totalRegularGamesNeeded = regularWeeks.length * gamesPerWeek;
             
-            // Step 5: Create game pool with proper distribution
-            const gamePool = [];
-            const matchupCounts = new Map();
+            // Step 5: Calculate how many times each matchup should be played
+            const completeRoundRobins = Math.floor(totalRegularGamesNeeded / roundRobinMatchups.length);
+            const extraGamesNeeded = totalRegularGamesNeeded - (completeRoundRobins * roundRobinMatchups.length);
+            const maxGamesPerMatchup = completeRoundRobins + (extraGamesNeeded > 0 ? 1 : 0);
             
-            // Initialize matchup counts
+            // Step 6: Create matchup usage tracker
+            const matchupUsage = new Map();
             roundRobinMatchups.forEach(matchup => {
                 const key = matchup.slice().sort().join('|');
-                matchupCounts.set(key, 0);
+                matchupUsage.set(key, 0);
             });
             
-            // Add games to pool, respecting the max +1 constraint
-            let gamesAdded = 0;
-            let currentRound = 1;
-            
-            while (gamesAdded < totalRegularGamesNeeded) {
-                let addedThisRound = 0;
-                
-                // Shuffle matchups for this round
-                const shuffledMatchups = [...roundRobinMatchups];
-                shuffledMatchups.sort(() => Math.random() - 0.5);
-                
-                for (const matchup of shuffledMatchups) {
-                    const key = matchup.slice().sort().join('|');
-                    const currentCount = matchupCounts.get(key);
-                    
-                    // Allow up to (currentRound) games between any pair
-                    if (currentCount < currentRound && gamesAdded < totalRegularGamesNeeded) {
-                        gamePool.push([...matchup]);
-                        matchupCounts.set(key, currentCount + 1);
-                        gamesAdded++;
-                        addedThisRound++;
-                    }
-                }
-                
-                // If we couldn't add any games this round, move to next round
-                if (addedThisRound === 0) {
-                    currentRound++;
-                }
-                
-                // Safety break to prevent infinite loops
-                if (currentRound > 3) break;
-            }
-            
-            // Step 6: Distribute games across regular weeks
-            gamePool.sort(() => Math.random() - 0.5);
-            let gameIndex = 0;
-            
+            // Step 7: Fill regular weeks using greedy algorithm
             regularWeeks.forEach(week => {
                 const weekGames = [];
                 const usedTeams = new Set();
-                let attempts = 0;
                 
-                // Try to fill the week with games
-                while (weekGames.length < gamesPerWeek && attempts < gamePool.length * 2) {
-                    const game = gamePool[gameIndex % gamePool.length];
-                    gameIndex++;
-                    attempts++;
+                // Get available matchups for this week
+                const availableMatchups = roundRobinMatchups.filter(matchup => {
+                    const key = matchup.slice().sort().join('|');
+                    const usage = matchupUsage.get(key);
+                    const team1Available = !usedTeams.has(matchup[0]);
+                    const team2Available = !usedTeams.has(matchup[1]);
                     
-                    // Check if both teams are available this week
-                    if (!usedTeams.has(game[0]) && !usedTeams.has(game[1])) {
-                        weekGames.push([...game]);
-                        usedTeams.add(game[0]);
-                        usedTeams.add(game[1]);
+                    return usage < maxGamesPerMatchup && team1Available && team2Available;
+                });
+                
+                // Shuffle available matchups for randomness
+                availableMatchups.sort(() => Math.random() - 0.5);
+                
+                // Assign games for this week
+                for (const matchup of availableMatchups) {
+                    if (weekGames.length >= gamesPerWeek) break;
+                    
+                    const key = matchup.slice().sort().join('|');
+                    const team1Available = !usedTeams.has(matchup[0]);
+                    const team2Available = !usedTeams.has(matchup[1]);
+                    
+                    if (team1Available && team2Available) {
+                        weekGames.push([...matchup]);
+                        usedTeams.add(matchup[0]);
+                        usedTeams.add(matchup[1]);
+                        
+                        // Update usage count
+                        const currentUsage = matchupUsage.get(key);
+                        matchupUsage.set(key, currentUsage + 1);
                     }
                 }
                 
                 schedule[week] = weekGames;
             });
+            
+            // Step 8: Validation - check for over-usage
+            console.log('Matchup usage validation:');
+            let maxUsage = 0;
+            let overUsedMatchups = [];
+            
+            matchupUsage.forEach((usage, matchup) => {
+                if (usage > maxGamesPerMatchup) {
+                    overUsedMatchups.push({matchup, usage, max: maxGamesPerMatchup});
+                }
+                maxUsage = Math.max(maxUsage, usage);
+            });
+            
+            if (overUsedMatchups.length > 0) {
+                console.warn('Over-used matchups detected:', overUsedMatchups);
+                alert(`Warning: Some team pairs are playing more than ${maxGamesPerMatchup} times. This indicates a scheduling conflict.`);
+            }
+            
+            console.log(`Expected max games per matchup: ${maxGamesPerMatchup}, Actual max: ${maxUsage}`);
             
             return schedule;
         }

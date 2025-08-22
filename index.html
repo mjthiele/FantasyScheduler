@@ -424,7 +424,8 @@
                     <!-- Rivalry inputs will be generated here -->
                 </div>
                 <div class="text-muted" id="rivalryHelp">
-                    Rivalries create special matchup weeks. Teams in rivalry pairs will play each other during rivalry weeks.
+                    <i class="fas fa-info-circle me-1"></i>
+                    Rivalries create special matchup weeks. Each team can only have one rivalry partner. Teams already in a rivalry will not appear in other rivalry dropdowns.
                 </div>
             </div>
         </div>
@@ -624,6 +625,31 @@
             }
         }
 
+        function getAvailableTeamsForRivalry(rivalryIndex, position) {
+            // Get all teams that are already used in other rivalries
+            const usedTeams = new Set();
+            
+            rivalries.forEach((rivalry, index) => {
+                if (index !== rivalryIndex) { // Don't count the current rivalry
+                    if (rivalry[0]) usedTeams.add(rivalry[0]);
+                    if (rivalry[1]) usedTeams.add(rivalry[1]);
+                }
+            });
+            
+            // For the current rivalry, don't exclude the other position's team
+            // (so Team A can't be both positions in the same rivalry)
+            const currentRivalry = rivalries[rivalryIndex];
+            if (currentRivalry) {
+                const otherPosition = position === 0 ? 1 : 0;
+                if (currentRivalry[otherPosition]) {
+                    usedTeams.add(currentRivalry[otherPosition]);
+                }
+            }
+            
+            // Return teams that aren't used elsewhere
+            return teams.filter(team => !usedTeams.has(team));
+        }
+
         function generateWeekCheckboxes() {
             const container = document.getElementById('weekCheckboxContainer');
             container.innerHTML = '';
@@ -688,12 +714,29 @@
             const rivalryDiv = document.createElement('div');
             rivalryDiv.className = 'rivalry-card';
             
+            // Get available teams for each position
+            const availableForPosition1 = getAvailableTeamsForRivalry(index, 0);
+            const availableForPosition2 = getAvailableTeamsForRivalry(index, 1);
+            
+            // Add current selections back to available teams if they exist
+            if (team1 && !availableForPosition1.includes(team1)) {
+                availableForPosition1.push(team1);
+            }
+            if (team2 && !availableForPosition2.includes(team2)) {
+                availableForPosition2.push(team2);
+            }
+            
+            // Create availability indicators
+            const pos1Available = availableForPosition1.length;
+            const pos2Available = availableForPosition2.length;
+            const totalTeams = teams.length;
+            
             rivalryDiv.innerHTML = `
                 <div class="row align-items-center">
                     <div class="col-md-5">
                         <select class="form-select" onchange="updateRivalry(${index}, 0, this.value)">
-                            <option value="">Select Team 1</option>
-                            ${teams.map(team => `<option value="${team}" ${team === team1 ? 'selected' : ''}>${team}</option>`).join('')}
+                            <option value="">Select Team 1 (${pos1Available}/${totalTeams} available)</option>
+                            ${availableForPosition1.map(team => `<option value="${team}" ${team === team1 ? 'selected' : ''}>${team}</option>`).join('')}
                         </select>
                     </div>
                     <div class="col-md-2 text-center">
@@ -701,8 +744,8 @@
                     </div>
                     <div class="col-md-4">
                         <select class="form-select" onchange="updateRivalry(${index}, 1, this.value)">
-                            <option value="">Select Team 2</option>
-                            ${teams.map(team => `<option value="${team}" ${team === team2 ? 'selected' : ''}>${team}</option>`).join('')}
+                            <option value="">Select Team 2 (${pos2Available}/${totalTeams} available)</option>
+                            ${availableForPosition2.map(team => `<option value="${team}" ${team === team2 ? 'selected' : ''}>${team}</option>`).join('')}
                         </select>
                     </div>
                     <div class="col-md-1">
@@ -776,6 +819,9 @@
                 rivalries[rivalryIndex] = ['', ''];
             }
             rivalries[rivalryIndex][teamIndex] = value;
+            
+            // Refresh the rivalry UI to update available teams in other dropdowns
+            generateRivalryInputsUI();
         }
 
         function addRivalry() {
@@ -792,9 +838,11 @@
             const maxRivalries = Math.floor(teams.length / 2);
             rivalries = [];
             
+            // Create a copy of teams and shuffle it
             const availableTeams = [...teams];
             availableTeams.sort(() => Math.random() - 0.5);
             
+            // Pair teams sequentially (ensures no team appears twice)
             for (let i = 0; i < maxRivalries && i * 2 + 1 < availableTeams.length; i++) {
                 rivalries.push([availableTeams[i * 2], availableTeams[i * 2 + 1]]);
             }
@@ -858,6 +906,27 @@
             
             if (rivalries.length > 0 && validRivalries.length !== rivalries.length) {
                 alert('Please complete all rivalry configurations or remove incomplete ones.');
+                return false;
+            }
+
+            // Check for duplicate teams across rivalries
+            const usedInRivalries = new Set();
+            for (const rivalry of validRivalries) {
+                if (usedInRivalries.has(rivalry[0])) {
+                    alert(`${rivalry[0]} is already in another rivalry. Each team can only have one rivalry partner.`);
+                    return false;
+                }
+                if (usedInRivalries.has(rivalry[1])) {
+                    alert(`${rivalry[1]} is already in another rivalry. Each team can only have one rivalry partner.`);
+                    return false;
+                }
+                usedInRivalries.add(rivalry[0]);
+                usedInRivalries.add(rivalry[1]);
+            }
+
+            // Check that we have rivalry weeks selected if we have rivalries
+            if (validRivalries.length > 0 && selectedRivalryWeeks.length === 0) {
+                alert('You have configured rivalries but no rivalry weeks selected. Please select rivalry weeks or remove rivalries.');
                 return false;
             }
 

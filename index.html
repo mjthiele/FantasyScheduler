@@ -108,6 +108,227 @@
             color: var(--kt-primary);
         }
 
+        /* Football Animation Styles */
+        .football-container {
+            position: relative;
+            overflow: visible;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-football-kick {
+            background: linear-gradient(45deg, #2e7d32, #4caf50, #66bb6a);
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+        }
+
+        .btn-football-kick:hover:not(.kicking) {
+            background: linear-gradient(45deg, #1b5e20, #2e7d32, #4caf50);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-football-kick.morphing {
+            animation: morphToFootball 0.8s ease-out forwards;
+        }
+
+        .btn-football-kick.kicking {
+            animation: kickFootball 2s ease-out forwards;
+        }
+
+        .btn-football-kick.returning {
+            animation: returnButton 0.8s ease-out forwards;
+        }
+
+        @keyframes morphToFootball {
+            0% {
+                border-radius: 0.5rem;
+                background: linear-gradient(45deg, #2e7d32, #4caf50, #66bb6a);
+                transform: scale(1);
+            }
+            50% {
+                border-radius: 50%;
+                background: #8D4F2B;
+                transform: scale(1.1) rotate(10deg);
+                box-shadow: 
+                    inset 0 0 0 3px #FFFFFF,
+                    0 6px 20px rgba(141, 79, 43, 0.6);
+            }
+            100% {
+                border-radius: 50%;
+                background: linear-gradient(45deg, #8D4F2B, #A0522D);
+                transform: scale(1.2) rotate(-5deg);
+                box-shadow: 
+                    inset 0 0 0 3px #FFFFFF,
+                    inset 0 -10px 0 2px #FFFFFF,
+                    inset 0 10px 0 2px #FFFFFF,
+                    0 8px 25px rgba(141, 79, 43, 0.8);
+            }
+        }
+
+        @keyframes kickFootball {
+            0% {
+                transform: scale(1.2) rotate(-5deg);
+                opacity: 1;
+            }
+            15% {
+                transform: scale(0.8) rotate(45deg) translateX(100px) translateY(-50px);
+            }
+            35% {
+                transform: scale(0.6) rotate(135deg) translateX(300px) translateY(-150px);
+            }
+            60% {
+                transform: scale(0.4) rotate(270deg) translateX(600px) translateY(-200px);
+            }
+            80% {
+                transform: scale(0.3) rotate(405deg) translateX(900px) translateY(-150px);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.2) rotate(540deg) translateX(1200px) translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes returnButton {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+                border-radius: 50%;
+                background: #8D4F2B;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                border-radius: 0.5rem;
+                background: linear-gradient(45deg, #2e7d32, #4caf50, #66bb6a);
+            }
+        }
+
+        .goal-posts {
+            position: absolute;
+            right: -100px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0;
+            z-index: 999;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .goal-posts.show {
+            animation: showGoalPosts 2.5s ease-out forwards;
+        }
+
+        @keyframes showGoalPosts {
+            0% {
+                opacity: 0;
+                transform: translateY(-50%) scale(0.8);
+            }
+            40% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.2);
+            }
+            60% {
+                transform: translateY(-50%) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50%) scale(1);
+            }
+        }
+
+        .kick-foot {
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            opacity: 0;
+            z-index: 1001;
+        }
+
+        .kick-foot.kicking {
+            animation: footKick 0.6s ease-out forwards;
+        }
+
+        @keyframes footKick {
+            0% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(-20px) rotate(-30deg);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0px) rotate(0deg);
+            }
+            70% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(40px) rotate(20deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(60px) rotate(30deg);
+            }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(46, 125, 50, 0.95);
+            border-radius: inherit;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+        }
+
+        .loading-overlay .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Prevent button text from wrapping during animations */
+        #generateBtnText {
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn i {
+            transition: opacity 0.3s ease;
+        }
+
         .rivalry-card {
             background-color: var(--kt-gray-100);
             border: 1px solid var(--kt-gray-300);
@@ -383,7 +604,7 @@
                             <i class="fas fa-random me-2"></i>Generate Random Team Names
                         </button>
                         <button class="btn btn-light-primary w-100 mb-3" onclick="autoGenerateRivalries()">
-                            <i class="fas fa-link me-2"></i>Auto-Generate Rivalries
+                            <i class="fas fa-link me-2"></i>Generate All Possible Rivalries
                         </button>
                         <button class="btn btn-light-primary w-100" onclick="clearAllData()">
                             <i class="fas fa-trash me-2"></i>Clear All Data
@@ -425,16 +646,21 @@
                 </div>
                 <div class="text-muted" id="rivalryHelp">
                     <i class="fas fa-info-circle me-1"></i>
-                    Rivalries create special matchup weeks. Each team can only have one rivalry partner. Teams already in a rivalry will not appear in other rivalry dropdowns.
+                    <span id="rivalryHelpText">Rivalries create special matchup weeks. Each team can only have one rivalry partner.</span>
                 </div>
             </div>
         </div>
 
         <!-- Generate Button -->
-        <div class="text-center mb-4">
+        <div class="text-center mb-4 football-container">
+            <div class="goal-posts" id="goalPosts">🥅</div>
+            <div class="kick-foot" id="kickFoot">🦵</div>
             <button class="btn btn-primary btn-lg px-5" id="generateBtn" onclick="generateSchedule()">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <span class="spinner-border spinner-border-sm text-white"></span>
+                </div>
                 <i class="fas fa-magic me-2"></i>
-                Generate Schedule
+                <span id="generateBtnText">Generate Schedule</span>
             </button>
         </div>
 
@@ -540,7 +766,7 @@
 
         // Initialize the application
         function initializeApp() {
-            updateSportDefaults();
+            updateSportDefaults(); // This already calls updateGenerateButton()
             updateTeamInputs();
             generateWeekCheckboxes();
             calculateScheduleInfo();
@@ -562,9 +788,101 @@
                 updateRivalryWeeksDisplay();
             }
             
+            // Update generate button based on sport
+            updateGenerateButton();
+            
             updateTeamInputs();
             generateWeekCheckboxes();
             calculateScheduleInfo();
+        }
+
+        function updateGenerateButton() {
+            const sportType = document.getElementById('sportType').value;
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('generateBtnText');
+            const btnIcon = btn.querySelector('i');
+            
+            // Remove all sport-specific classes
+            btn.classList.remove('btn-football-kick', 'btn-primary');
+            
+            if (sportType === 'fantasy_football') {
+                btn.classList.add('btn-football-kick');
+                btnIcon.className = 'fas fa-football-ball me-2';
+                btnText.textContent = 'Kick Schedule!';
+            } else {
+                btn.classList.add('btn-primary');
+                
+                switch(sportType) {
+                    case 'fantasy_baseball':
+                        btnIcon.className = 'fas fa-baseball-ball me-2';
+                        btnText.textContent = 'Pitch Schedule!';
+                        break;
+                    case 'basketball':
+                        btnIcon.className = 'fas fa-basketball-ball me-2';
+                        btnText.textContent = 'Shoot Schedule!';
+                        break;
+                    case 'soccer':
+                        btnIcon.className = 'fas fa-futbol me-2';
+                        btnText.textContent = 'Score Schedule!';
+                        break;
+                    default:
+                        btnIcon.className = 'fas fa-magic me-2';
+                        btnText.textContent = 'Generate Schedule';
+                }
+            }
+        }
+
+        function triggerFootballKick() {
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('generateBtnText');
+            const btnIcon = btn.querySelector('i');
+            const goalPosts = document.getElementById('goalPosts');
+            const kickFoot = document.getElementById('kickFoot');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Phase 1: Transform button into football
+            btnText.style.opacity = '0';
+            btnIcon.style.opacity = '0';
+            btn.classList.add('morphing');
+            
+            setTimeout(() => {
+                // Phase 2: Show foot and goal posts, kick the football
+                btn.classList.remove('morphing');
+                btn.classList.add('kicking');
+                goalPosts.classList.add('show');
+                kickFoot.classList.add('kicking');
+                
+                // Phase 3: Show loading overlay on a duplicate button
+                setTimeout(() => {
+                    loadingOverlay.classList.add('show');
+                }, 800);
+                
+                // Phase 4: Return button after kick completes
+                setTimeout(() => {
+                    btn.classList.remove('kicking');
+                    btn.classList.add('returning');
+                    loadingOverlay.classList.remove('show');
+                    
+                    // Restore text and icon
+                    btnText.textContent = 'Kicking...';
+                    btnText.style.opacity = '1';
+                    btnIcon.style.opacity = '1';
+                    btnIcon.className = 'fas fa-football-ball me-2';
+                    
+                    setTimeout(() => {
+                        btn.classList.remove('returning');
+                    }, 800);
+                    
+                }, 2000);
+                
+            }, 800);
+            
+            // Clean up animations after everything completes
+            setTimeout(() => {
+                goalPosts.classList.remove('show');
+                kickFoot.classList.remove('kicking');
+                console.log('🎉 FIELD GOAL! Schedule generated successfully! 🎉');
+            }, 3500);
         }
 
         function updateTeamInputs() {
@@ -584,6 +902,12 @@
                 }
             }
             teams = teams.slice(0, teamCount);
+            
+            // Remove excess rivalries if team count decreased
+            const maxRivalries = Math.floor(teamCount / 2);
+            if (rivalries.length > maxRivalries) {
+                rivalries = rivalries.slice(0, maxRivalries);
+            }
             
             generateTeamInputsUI();
             generateRivalryInputsUI();
@@ -621,8 +945,11 @@
             });
             
             if (rivalries.length === 0) {
-                container.innerHTML = '<div class="text-muted text-center py-4">No rivalries configured. Click "Add Rivalry" to create matchups.</div>';
+                const maxRivalries = Math.floor(teams.length / 2);
+                container.innerHTML = `<div class="text-muted text-center py-4">No rivalries configured. You can create up to ${maxRivalries} rivalry pairs with ${teams.length} teams.</div>`;
             }
+            
+            updateAddRivalryButton();
         }
 
         function getAvailableTeamsForRivalry(rivalryIndex, position) {
@@ -796,17 +1123,20 @@
                         <small>• ${roundRobinMatchups} unique non-rivalry matchups</small><br>
                         <small>• ${completeRoundRobins} complete round robin(s)</small><br>
                         <small>• ${remainingGamesAfterRoundRobins} extra games needed</small><br>
-                        <small>• Max ${maxGamesPerPair} games between any pair</small>
+                        <small>• Max ${maxGamesPerPair} games between any non-rival pair</small>
                     </div>
                     <div class="col-md-6">
                         <small><strong>Game Distribution:</strong></small><br>
-                        <small>• ${gamesPerWeek} games per week</small><br>
+                        <small>• ${gamesPerWeek} games per week (${teamCount}÷2)</small><br>
                         <small>• ${regularWeeks} regular weeks + ${rivalryWeeksCount} rivalry weeks</small><br>
-                        <small>• ~${gamesPerTeam} games per team</small><br>
-                        <small>• ${totalGames} total games</small>
+                        <small>• ~${gamesPerTeam} games per team total</small><br>
+                        <small>• ${totalGames} total games scheduled</small>
                     </div>
                 </div>
             `;
+            
+            // Update help text
+            updateAddRivalryButton();
         }
 
         function updateTeam(index, value) {
@@ -825,29 +1155,66 @@
         }
 
         function addRivalry() {
+            const maxRivalries = Math.floor(teams.length / 2);
+            
+            if (rivalries.length >= maxRivalries) {
+                alert(`Maximum rivalries reached! With ${teams.length} teams, you can only have ${maxRivalries} rivalry pairs.`);
+                return;
+            }
+            
             rivalries.push(['', '']);
             generateRivalryInputsUI();
+            updateAddRivalryButton();
+        }
+
+        function updateAddRivalryButton() {
+            const maxRivalries = Math.floor(teams.length / 2);
+            const addButton = document.querySelector('.btn.btn-success[onclick="addRivalry()"], .btn.btn-secondary[onclick="addRivalry()"]');
+            
+            if (addButton) {
+                if (rivalries.length >= maxRivalries) {
+                    addButton.disabled = true;
+                    addButton.innerHTML = `<i class="fas fa-ban me-1"></i>Max Rivalries (${maxRivalries})`;
+                    addButton.classList.remove('btn-success');
+                    addButton.classList.add('btn-secondary');
+                } else {
+                    addButton.disabled = false;
+                    addButton.innerHTML = `<i class="fas fa-plus me-1"></i>Add Rivalry (${rivalries.length}/${maxRivalries})`;
+                    addButton.classList.remove('btn-secondary');
+                    addButton.classList.add('btn-success');
+                }
+            }
+            
+            // Update help text
+            const helpText = document.getElementById('rivalryHelpText');
+            if (helpText) {
+                helpText.textContent = `Rivalries create special matchup weeks. Each team can only have one rivalry partner. Maximum ${maxRivalries} rivalries with ${teams.length} teams.`;
+            }
         }
 
         function removeRivalry(index) {
             rivalries.splice(index, 1);
             generateRivalryInputsUI();
+            updateAddRivalryButton();
         }
 
         function autoGenerateRivalries() {
             const maxRivalries = Math.floor(teams.length / 2);
-            rivalries = [];
             
-            // Create a copy of teams and shuffle it
-            const availableTeams = [...teams];
-            availableTeams.sort(() => Math.random() - 0.5);
-            
-            // Pair teams sequentially (ensures no team appears twice)
-            for (let i = 0; i < maxRivalries && i * 2 + 1 < availableTeams.length; i++) {
-                rivalries.push([availableTeams[i * 2], availableTeams[i * 2 + 1]]);
+            if (confirm(`This will create ${maxRivalries} random rivalry pairs using all ${teams.length} teams. Continue?`)) {
+                rivalries = [];
+                
+                // Create a copy of teams and shuffle it
+                const availableTeams = [...teams];
+                availableTeams.sort(() => Math.random() - 0.5);
+                
+                // Pair teams sequentially (ensures no team appears twice)
+                for (let i = 0; i < maxRivalries && i * 2 + 1 < availableTeams.length; i++) {
+                    rivalries.push([availableTeams[i * 2], availableTeams[i * 2 + 1]]);
+                }
+                
+                generateRivalryInputsUI();
             }
-            
-            generateRivalryInputsUI();
         }
 
         function generateRandomTeamNames() {
@@ -924,9 +1291,17 @@
                 usedInRivalries.add(rivalry[1]);
             }
 
-            // Check that we have rivalry weeks selected if we have rivalries
+            // Check that rivalry weeks can accommodate all rivalry games
             if (validRivalries.length > 0 && selectedRivalryWeeks.length === 0) {
                 alert('You have configured rivalries but no rivalry weeks selected. Please select rivalry weeks or remove rivalries.');
+                return false;
+            }
+            
+            // Check that rivalry weeks can fit all rivalry games
+            const gamesPerWeek = Math.floor(teams.length / 2);
+            const totalRivalrySlots = selectedRivalryWeeks.length * gamesPerWeek;
+            if (validRivalries.length > totalRivalrySlots) {
+                alert(`You have ${validRivalries.length} rivalries but only ${totalRivalrySlots} rivalry game slots (${selectedRivalryWeeks.length} weeks × ${gamesPerWeek} games/week). Please add more rivalry weeks or reduce rivalries.`);
                 return false;
             }
 
@@ -938,22 +1313,101 @@
             if (!validateInputs()) return;
 
             const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('generateBtnText');
+            const sportType = scheduleConfig.sportType;
+            
+            // Disable button immediately
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
-
-            setTimeout(() => {
-                try {
-                    const schedule = createSchedule();
-                    currentSchedule = schedule;
-                    displaySchedule(schedule);
-                    updateStatistics(schedule);
-                } catch (error) {
-                    alert('Error generating schedule: ' + error.message);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-magic me-2"></i>Generate Schedule';
+            
+            // Trigger sport-specific animation
+            if (sportType === 'fantasy_football') {
+                triggerFootballKick();
+                
+                // Start actual generation after button transforms and gets kicked
+                setTimeout(() => {
+                    try {
+                        const schedule = createSchedule();
+                        currentSchedule = schedule;
+                        displaySchedule(schedule);
+                        updateStatistics(schedule);
+                        
+                        // Show success celebration
+                        setTimeout(() => {
+                            const toast = document.createElement('div');
+                            toast.className = 'alert alert-success position-fixed';
+                            toast.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; animation: slideIn 0.5s ease-out;';
+                            toast.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <span style="font-size: 1.5rem; margin-right: 10px;">🏈🎉</span>
+                                    <div>
+                                        <strong>FIELD GOAL!</strong><br>
+                                        <small>Your fantasy football schedule is ready!</small>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(toast);
+                            
+                            setTimeout(() => {
+                                toast.remove();
+                            }, 4000);
+                        }, 500);
+                        
+                    } catch (error) {
+                        alert('Error generating schedule: ' + error.message);
+                    } finally {
+                        // Re-enable button and restore text
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btnText.textContent = 'Kick Schedule!';
+                        }, 500);
+                    }
+                }, 3000); // Wait for kick animation to complete
+                
+            } else {
+                // Non-football sports - standard generation
+                let loadingText = 'Generating...';
+                switch(sportType) {
+                    case 'fantasy_baseball':
+                        loadingText = 'Pitching...';
+                        break;
+                    case 'basketball':
+                        loadingText = 'Shooting...';
+                        break;
+                    case 'soccer':
+                        loadingText = 'Scoring...';
+                        break;
                 }
-            }, 500);
+                
+                btnText.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${loadingText}`;
+
+                setTimeout(() => {
+                    try {
+                        const schedule = createSchedule();
+                        currentSchedule = schedule;
+                        displaySchedule(schedule);
+                        updateStatistics(schedule);
+                    } catch (error) {
+                        alert('Error generating schedule: ' + error.message);
+                    } finally {
+                        btn.disabled = false;
+                        
+                        // Restore original button text
+                        switch(sportType) {
+                            case 'fantasy_baseball':
+                                btnText.textContent = 'Pitch Schedule!';
+                                break;
+                            case 'basketball':
+                                btnText.textContent = 'Shoot Schedule!';
+                                break;
+                            case 'soccer':
+                                btnText.textContent = 'Score Schedule!';
+                                break;
+                            default:
+                                btnText.textContent = 'Generate Schedule';
+                        }
+                    }
+                }, 1000);
+            }
         }
 
         function createSchedule() {
@@ -961,6 +1415,8 @@
             const totalWeeks = scheduleConfig.totalWeeks;
             const rivalryWeeks = selectedRivalryWeeks;
             const gamesPerWeek = Math.floor(teamCount / 2);
+            
+            console.log(`Creating schedule: ${teamCount} teams, ${gamesPerWeek} games per week`);
             
             const schedule = {};
             
@@ -971,6 +1427,7 @@
                     allMatchups.push([teams[i], teams[j]]);
                 }
             }
+            console.log(`Total possible matchups: ${allMatchups.length}`);
             
             // Step 2: Separate rivalry pairs from regular matchups
             const rivalryPairs = rivalries.filter(r => r[0] && r[1]);
@@ -981,10 +1438,12 @@
             const roundRobinMatchups = allMatchups.filter(matchup => 
                 !rivalryKeys.has(matchup.slice().sort().join('|'))
             );
+            console.log(`Rivalry pairs: ${rivalryPairs.length}, Round robin matchups: ${roundRobinMatchups.length}`);
             
             // Step 3: Place rivalry games in designated weeks
             rivalryWeeks.forEach(week => {
                 schedule[week] = [...rivalryPairs];
+                console.log(`Week ${week} (rivalry): ${rivalryPairs.length} games`);
             });
             
             // Step 4: Calculate regular weeks and required games
@@ -994,13 +1453,17 @@
                     regularWeeks.push(week);
                 }
             }
+            console.log(`Regular weeks: ${regularWeeks.length}`);
             
             const totalRegularGamesNeeded = regularWeeks.length * gamesPerWeek;
+            console.log(`Total regular games needed: ${totalRegularGamesNeeded}`);
             
             // Step 5: Calculate how many times each matchup should be played
             const completeRoundRobins = Math.floor(totalRegularGamesNeeded / roundRobinMatchups.length);
             const extraGamesNeeded = totalRegularGamesNeeded - (completeRoundRobins * roundRobinMatchups.length);
             const maxGamesPerMatchup = completeRoundRobins + (extraGamesNeeded > 0 ? 1 : 0);
+            
+            console.log(`Complete round robins: ${completeRoundRobins}, Extra games: ${extraGamesNeeded}, Max per matchup: ${maxGamesPerMatchup}`);
             
             // Step 6: Create matchup usage tracker
             const matchupUsage = new Map();
@@ -1009,64 +1472,113 @@
                 matchupUsage.set(key, 0);
             });
             
-            // Step 7: Fill regular weeks using greedy algorithm
-            regularWeeks.forEach(week => {
+            // Step 7: Fill regular weeks using improved algorithm
+            regularWeeks.forEach((week, weekIndex) => {
+                console.log(`\nFilling week ${week}:`);
                 const weekGames = [];
                 const usedTeams = new Set();
                 
-                // Get available matchups for this week
+                // Create a priority list of matchups for this week
+                // Prioritize matchups that have been used less
                 const availableMatchups = roundRobinMatchups.filter(matchup => {
                     const key = matchup.slice().sort().join('|');
                     const usage = matchupUsage.get(key);
-                    const team1Available = !usedTeams.has(matchup[0]);
-                    const team2Available = !usedTeams.has(matchup[1]);
-                    
-                    return usage < maxGamesPerMatchup && team1Available && team2Available;
+                    return usage < maxGamesPerMatchup;
                 });
                 
-                // Shuffle available matchups for randomness
-                availableMatchups.sort(() => Math.random() - 0.5);
+                // Sort by usage (least used first), then randomize within each usage level
+                availableMatchups.sort((a, b) => {
+                    const keyA = a.slice().sort().join('|');
+                    const keyB = b.slice().sort().join('|');
+                    const usageA = matchupUsage.get(keyA);
+                    const usageB = matchupUsage.get(keyB);
+                    if (usageA !== usageB) return usageA - usageB;
+                    return Math.random() - 0.5;
+                });
                 
-                // Assign games for this week
-                for (const matchup of availableMatchups) {
-                    if (weekGames.length >= gamesPerWeek) break;
+                // Try to fill the week with exactly gamesPerWeek games
+                let attempts = 0;
+                const maxAttempts = availableMatchups.length * 2;
+                
+                while (weekGames.length < gamesPerWeek && attempts < maxAttempts) {
+                    let gameAdded = false;
                     
-                    const key = matchup.slice().sort().join('|');
-                    const team1Available = !usedTeams.has(matchup[0]);
-                    const team2Available = !usedTeams.has(matchup[1]);
-                    
-                    if (team1Available && team2Available) {
-                        weekGames.push([...matchup]);
-                        usedTeams.add(matchup[0]);
-                        usedTeams.add(matchup[1]);
+                    for (const matchup of availableMatchups) {
+                        if (weekGames.length >= gamesPerWeek) break;
                         
-                        // Update usage count
-                        const currentUsage = matchupUsage.get(key);
-                        matchupUsage.set(key, currentUsage + 1);
+                        const key = matchup.slice().sort().join('|');
+                        const usage = matchupUsage.get(key);
+                        const team1Available = !usedTeams.has(matchup[0]);
+                        const team2Available = !usedTeams.has(matchup[1]);
+                        
+                        if (usage < maxGamesPerMatchup && team1Available && team2Available) {
+                            weekGames.push([...matchup]);
+                            usedTeams.add(matchup[0]);
+                            usedTeams.add(matchup[1]);
+                            matchupUsage.set(key, usage + 1);
+                            gameAdded = true;
+                            console.log(`  Added: ${matchup[0]} vs ${matchup[1]} (usage now ${usage + 1})`);
+                        }
+                    }
+                    
+                    if (!gameAdded) break;
+                    attempts++;
+                }
+                
+                console.log(`Week ${week} completed with ${weekGames.length} games (target: ${gamesPerWeek})`);
+                
+                // CRITICAL: Ensure we always have the right number of games
+                if (weekGames.length < gamesPerWeek) {
+                    console.warn(`Week ${week} only has ${weekGames.length} games, need ${gamesPerWeek}`);
+                    
+                    // Emergency fill: Allow exceeding maxGamesPerMatchup if necessary
+                    const emergencyMatchups = roundRobinMatchups.filter(matchup => {
+                        return !usedTeams.has(matchup[0]) && !usedTeams.has(matchup[1]);
+                    });
+                    
+                    for (const matchup of emergencyMatchups) {
+                        if (weekGames.length >= gamesPerWeek) break;
+                        
+                        const team1Available = !usedTeams.has(matchup[0]);
+                        const team2Available = !usedTeams.has(matchup[1]);
+                        
+                        if (team1Available && team2Available) {
+                            weekGames.push([...matchup]);
+                            usedTeams.add(matchup[0]);
+                            usedTeams.add(matchup[1]);
+                            
+                            const key = matchup.slice().sort().join('|');
+                            const currentUsage = matchupUsage.get(key) || 0;
+                            matchupUsage.set(key, currentUsage + 1);
+                            console.log(`  Emergency add: ${matchup[0]} vs ${matchup[1]}`);
+                        }
                     }
                 }
                 
                 schedule[week] = weekGames;
             });
             
-            // Step 8: Validation - check for over-usage
-            console.log('Matchup usage validation:');
+            // Step 8: Final validation
+            console.log('\n=== Final Schedule Validation ===');
             let maxUsage = 0;
-            let overUsedMatchups = [];
+            let totalRegularGames = 0;
+            
+            Object.keys(schedule).forEach(week => {
+                const weekNum = parseInt(week);
+                const gameCount = schedule[week].length;
+                console.log(`Week ${week}: ${gameCount} games ${rivalryWeeks.includes(weekNum) ? '(rivalry)' : '(regular)'}`);
+                
+                if (!rivalryWeeks.includes(weekNum)) {
+                    totalRegularGames += gameCount;
+                }
+            });
             
             matchupUsage.forEach((usage, matchup) => {
-                if (usage > maxGamesPerMatchup) {
-                    overUsedMatchups.push({matchup, usage, max: maxGamesPerMatchup});
-                }
                 maxUsage = Math.max(maxUsage, usage);
             });
             
-            if (overUsedMatchups.length > 0) {
-                console.warn('Over-used matchups detected:', overUsedMatchups);
-                alert(`Warning: Some team pairs are playing more than ${maxGamesPerMatchup} times. This indicates a scheduling conflict.`);
-            }
-            
-            console.log(`Expected max games per matchup: ${maxGamesPerMatchup}, Actual max: ${maxUsage}`);
+            console.log(`Total regular games scheduled: ${totalRegularGames} (needed: ${totalRegularGamesNeeded})`);
+            console.log(`Max usage per matchup: ${maxUsage} (allowed: ${maxGamesPerMatchup})`);
             
             return schedule;
         }

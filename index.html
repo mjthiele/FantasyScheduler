@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Schedule Generator</title>
+    
+    <!-- Metronic 9 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --kt-primary: #009ef7;
+            --kt-primary-light: #f1faff;
+            --kt-secondary: #e4e6ef;
+            --kt-success: #50cd89;
+            --kt-info: #7239ea;
+            --kt-warning: #ffc700;
+            --kt-danger: #f1416c;
+            --kt-gray-100: #f9f9f9;
+            --kt-gray-200: #f4f4f4;
+            --kt-gray-300: #e1e3ea;
+            --kt-gray-400: #b5b5c3;
+            --kt-gray-500: #a1a5b7;
+            --kt-gray-600: #7e8299;
+            --kt-gray-700: #5e6278;
+            --kt-gray-800: #3f4254;
+            --kt-gray-900: #181c32;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--kt-gray-100);
+            color: var(--kt-gray-800);
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--kt-primary) 0%, var(--kt-info) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        }
+
+        .card {
+            border: 0;
+            box-shadow: 0 0.1rem 1rem 0.25rem rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--kt-gray-300);
+            padding: 1.5rem 2rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            color: var(--kt-gray-700);
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--kt-gray-300);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--kt-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 158, 247, 0.15);
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--kt-primary);
+            border-color: var(--kt-primary);
+        }
+
+        .btn-success {
+            background-color: var(--kt-success);
+            border-color: var(--kt-success);
+        }
+
+        .btn-danger {
+            background-color: var(--kt-danger);
+            border-color: var(--kt-danger);
+        }
+
+        .btn-light-primary {
+            background-color: var(--kt-primary-light);
+            border-color: transparent;
+            color: var(--kt-primary);
+        }
+
+        .rivalry-card {
+            background-color: var(--kt-gray-100);
+            border: 1px solid var(--kt-gray-300);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .schedule-week {
+            background: white;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 0.1rem 1rem 0.25rem rgba(0, 0, 0, 0.05);
+        }
+
+        .schedule-week-header {
+            background: linear-gradient(90deg, var(--kt-primary) 0%, var(--kt-info) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .schedule-week-body {
+            padding: 1.5rem;
+        }
+
+        .game-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: var(--kt-gray-100);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .team-badge {
+            background-color: var(--kt-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .vs-divider {
+            color: var(--kt-gray-500);
+            font-weight: 600;
+            margin: 0 1rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--kt-success) 0%, #20c997 100%);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-item {
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .alert {
+            border: 0;
+            border-radius: 0.5rem;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .team-input-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .team-number {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--kt-primary);
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 5;
+        }
+
+        .team-input {
+            padding-left: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 1.5rem 0;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .rivalry-card {
+                padding: 0.75rem;
+            }
+            
+            .game-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+            
+            .vs-divider {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="mb-2">
+                        <i class="fas fa-calendar-alt me-3"></i>
+                        Sports Schedule Generator
+                    </h1>
+                    <p class="mb-0 opacity-75">Create professional schedules for any sport with dynamic team counts and flexible configurations</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <div class="d-flex align-items-center justify-content-lg-end gap-3">
+                        <i class="fas fa-users fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Configuration Section -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-cog text-primary me-2"></i>
+                            League Configuration
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Sport Type</label>
+                                <select class="form-select" id="sportType" onchange="updateSportDefaults()">
+                                    <option value="fantasy_football">Fantasy Football</option>
+                                    <option value="fantasy_baseball">Fantasy Baseball</option>
+                                    <option value="basketball">Fantasy Basketball</option>
+                                    <option value="soccer">Fantasy Soccer</option>
+                                    <option value="custom">Custom Sport</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Number of Teams</label>
+                                <select class="form-select" id="teamCount" onchange="updateTeamInputs()">
+                                    <option value="8">8 Teams</option>
+                                    <option value="10">10 Teams</option>
+                                    <option value="12" selected>12 Teams</option>
+                                    <option value="14">14 Teams</option>
+                                    <option value="16">16 Teams</option>
+                                    <option value="18">18 Teams</option>
+                                    <option value="20">20 Teams</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Total Weeks</label>
+                                <input type="number" class="form-control" id="totalWeeks" value="14" min="4" max="30" onchange="calculateScheduleInfo()">
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Rivalry Weeks</label>
+                                <input type="number" class="form-control" id="rivalryWeeks" value="2" min="0" max="4" onchange="calculateScheduleInfo()">
+                            </div>
+                        </div>
+
+                        <!-- Schedule Information -->
+                        <div class="alert alert-info" id="scheduleInfo">
+                            <h6><i class="fas fa-info-circle me-2"></i>Schedule Information</h6>
+                            <div id="scheduleDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <!-- Statistics -->
+                <div class="stats-card" id="statsCard" style="display: none;">
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <div class="stats-item">
+                                <div class="stats-number" id="totalGamesCount">0</div>
+                                <div class="stats-label">Total Games</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stats-item">
+                                <div class="stats-number" id="roundRobinsCount">0</div>
+                                <div class="stats-label">Round Robins</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stats-item">
+                                <div class="stats-number" id="gamesPerTeamCount">0</div>
+                                <div class="stats-label">Games/Team</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stats-item">
+                                <div class="stats-number" id="weeksUsedCount">0</div>
+                                <div class="stats-label">Weeks Used</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-rocket text-success me-2"></i>
+                            Quick Actions
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-light-primary w-100 mb-3" onclick="generateRandomTeamNames()">
+                            <i class="fas fa-random me-2"></i>Generate Random Team Names
+                        </button>
+                        <button class="btn btn-light-primary w-100 mb-3" onclick="autoGenerateRivalries()">
+                            <i class="fas fa-link me-2"></i>Auto-Generate Rivalries
+                        </button>
+                        <button class="btn btn-light-primary w-100" onclick="clearAllData()">
+                            <i class="fas fa-trash me-2"></i>Clear All Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teams Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users text-success me-2"></i>
+                    Team Names
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row" id="teamsContainer">
+                    <!-- Team inputs will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rivalries Section -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-sword text-warning me-2"></i>
+                    Rivalry Matchups
+                </h3>
+                <button class="btn btn-success btn-sm" onclick="addRivalry()">
+                    <i class="fas fa-plus me-1"></i>Add Rivalry
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="rivalriesContainer">
+                    <!-- Rivalry inputs will be generated here -->
+                </div>
+                <div class="text-muted" id="rivalryHelp">
+                    Rivalries create special matchup weeks. Teams in rivalry pairs will play each other during rivalry weeks.
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="text-center mb-4">
+            <button class="btn btn-primary btn-lg px-5" id="generateBtn" onclick="generateSchedule()">
+                <i class="fas fa-magic me-2"></i>
+                Generate Schedule
+            </button>
+        </div>
+
+        <!-- Schedule Output -->
+        <div id="scheduleOutput" style="display: none;">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-check text-success me-2"></i>
+                        Generated Schedule
+                    </h3>
+                    <div>
+                        <button class="btn btn-success me-2" onclick="downloadSchedule()">
+                            <i class="fas fa-download me-1"></i>Download
+                        </button>
+                        <button class="btn btn-light" onclick="printSchedule()">
+                            <i class="fas fa-print me-1"></i>Print
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="scheduleContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let teams = [];
+        let rivalries = [];
+        let currentSchedule = null;
+        let scheduleConfig = {
+            teamCount: 12,
+            totalWeeks: 14,
+            rivalryWeeks: 2,
+            sportType: 'fantasy_football'
+        };
+
+        // Sport configurations
+        const sportConfigs = {
+            fantasy_football: {
+                name: 'Fantasy Football',
+                defaultTeams: ['Ders', 'Brock', 'Nick', 'Marc', 'Rick', 'Spencer', 'Matt', 'Eli', 'ben', 'Sam', 'Paul', 'Addi'],
+                defaultWeeks: 14,
+                defaultRivalryWeeks: 2
+            },
+            fantasy_baseball: {
+                name: 'Fantasy Baseball',
+                defaultTeams: ['Yankees', 'Red Sox', 'Dodgers', 'Giants', 'Cubs', 'Cardinals', 'Astros', 'Rangers', 'Braves', 'Phillies', 'Mets', 'Nationals'],
+                defaultWeeks: 22,
+                defaultRivalryWeeks: 2
+            },
+            basketball: {
+                name: 'Fantasy Basketball',
+                defaultTeams: ['Lakers', 'Celtics', 'Warriors', 'Bulls', 'Heat', 'Spurs', 'Knicks', 'Nets', 'Mavs', 'Nuggets', 'Suns', 'Clippers'],
+                defaultWeeks: 20,
+                defaultRivalryWeeks: 2
+            },
+            soccer: {
+                name: 'Fantasy Soccer',
+                defaultTeams: ['Arsenal', 'Chelsea', 'Liverpool', 'ManCity', 'ManUnited', 'Tottenham', 'Newcastle', 'Brighton', 'Villa', 'West Ham', 'Wolves', 'Crystal Palace'],
+                defaultWeeks: 18,
+                defaultRivalryWeeks: 2
+            },
+            custom: {
+                name: 'Custom Sport',
+                defaultTeams: [],
+                defaultWeeks: 14,
+                defaultRivalryWeeks: 2
+            }
+        };
+
+        // Initialize the application
+        function initializeApp() {
+            updateSportDefaults();
+            updateTeamInputs();
+            calculateScheduleInfo();
+        }
+
+        function updateSportDefaults() {
+            const sportType = document.getElementById('sportType').value;
+            const config = sportConfigs[sportType];
+            
+            scheduleConfig.sportType = sportType;
+            
+            if (sportType !== 'custom') {
+                document.getElementById('totalWeeks').value = config.defaultWeeks;
+                document.getElementById('rivalryWeeks').value = config.defaultRivalryWeeks;
+                scheduleConfig.totalWeeks = config.defaultWeeks;
+                scheduleConfig.rivalryWeeks = config.defaultRivalryWeeks;
+            }
+            
+            updateTeamInputs();
+            calculateScheduleInfo();
+        }
+
+        function updateTeamInputs() {
+            const teamCount = parseInt(document.getElementById('teamCount').value);
+            const sportType = document.getElementById('sportType').value;
+            const config = sportConfigs[sportType];
+            
+            scheduleConfig.teamCount = teamCount;
+            
+            // Resize teams array
+            while (teams.length < teamCount) {
+                const index = teams.length;
+                if (config.defaultTeams && config.defaultTeams[index]) {
+                    teams.push(config.defaultTeams[index]);
+                } else {
+                    teams.push(`Team ${index + 1}`);
+                }
+            }
+            teams = teams.slice(0, teamCount);
+            
+            generateTeamInputsUI();
+            generateRivalryInputsUI();
+            calculateScheduleInfo();
+        }
+
+        function generateTeamInputsUI() {
+            const container = document.getElementById('teamsContainer');
+            container.innerHTML = '';
+            
+            teams.forEach((team, index) => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-lg-4 col-md-6 mb-3';
+                
+                colDiv.innerHTML = `
+                    <div class="team-input-container">
+                        <div class="team-number">${index + 1}</div>
+                        <input type="text" class="form-control team-input" 
+                               value="${team}" 
+                               onchange="updateTeam(${index}, this.value)"
+                               placeholder="Enter team name">
+                    </div>
+                `;
+                
+                container.appendChild(colDiv);
+            });
+        }
+
+        function generateRivalryInputsUI() {
+            const container = document.getElementById('rivalriesContainer');
+            container.innerHTML = '';
+            
+            rivalries.forEach((rivalry, index) => {
+                addRivalryInputUI(index, rivalry[0], rivalry[1]);
+            });
+            
+            if (rivalries.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-4">No rivalries configured. Click "Add Rivalry" to create matchups.</div>';
+            }
+        }
+
+        function addRivalryInputUI(index, team1 = '', team2 = '') {
+            const container = document.getElementById('rivalriesContainer');
+            
+            // Remove empty message if exists
+            if (container.querySelector('.text-muted')) {
+                container.innerHTML = '';
+            }
+            
+            const rivalryDiv = document.createElement('div');
+            rivalryDiv.className = 'rivalry-card';
+            
+            rivalryDiv.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <select class="form-select" onchange="updateRivalry(${index}, 0, this.value)">
+                            <option value="">Select Team 1</option>
+                            ${teams.map(team => `<option value="${team}" ${team === team1 ? 'selected' : ''}>${team}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <span class="badge bg-primary">VS</span>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" onchange="updateRivalry(${index}, 1, this.value)">
+                            <option value="">Select Team 2</option>
+                            ${teams.map(team => `<option value="${team}" ${team === team2 ? 'selected' : ''}>${team}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-danger btn-sm" onclick="removeRivalry(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(rivalryDiv);
+        }
+
+        function calculateScheduleInfo() {
+            const teamCount = parseInt(document.getElementById('teamCount').value);
+            const totalWeeks = parseInt(document.getElementById('totalWeeks').value);
+            const rivalryWeeks = parseInt(document.getElementById('rivalryWeeks').value);
+            
+            scheduleConfig.totalWeeks = totalWeeks;
+            scheduleConfig.rivalryWeeks = rivalryWeeks;
+            
+            // Calculate round robin information
+            const gamesPerRoundRobin = (teamCount * (teamCount - 1)) / 2;
+            const gamesPerWeek = Math.floor(teamCount / 2);
+            const weeksPerRoundRobin = teamCount % 2 === 0 ? teamCount - 1 : teamCount;
+            
+            const availableWeeksForRoundRobin = totalWeeks - rivalryWeeks;
+            const completeRoundRobins = Math.floor(availableWeeksForRoundRobin / weeksPerRoundRobin);
+            const remainingWeeks = availableWeeksForRoundRobin % weeksPerRoundRobin;
+            
+            const totalRoundRobinGames = completeRoundRobins * gamesPerRoundRobin + remainingWeeks * gamesPerWeek;
+            const rivalryGames = rivalryWeeks * Math.min(rivalries.length, gamesPerWeek);
+            const totalGames = totalRoundRobinGames + rivalryGames;
+            const gamesPerTeam = Math.floor(totalGames * 2 / teamCount);
+            
+            // Update schedule info
+            document.getElementById('scheduleDetails').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <small><strong>Round Robin Info:</strong></small><br>
+                        <small>• ${weeksPerRoundRobin} weeks per complete round robin</small><br>
+                        <small>• ${completeRoundRobins} complete round robin(s)</small><br>
+                        <small>• ${remainingWeeks} partial weeks</small>
+                    </div>
+                    <div class="col-md-6">
+                        <small><strong>Game Distribution:</strong></small><br>
+                        <small>• ${gamesPerWeek} games per week</small><br>
+                        <small>• ~${gamesPerTeam} games per team</small><br>
+                        <small>• ${totalGames} total games</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateTeam(index, value) {
+            teams[index] = value;
+            generateRivalryInputsUI();
+        }
+
+        function updateRivalry(rivalryIndex, teamIndex, value) {
+            if (!rivalries[rivalryIndex]) {
+                rivalries[rivalryIndex] = ['', ''];
+            }
+            rivalries[rivalryIndex][teamIndex] = value;
+        }
+
+        function addRivalry() {
+            rivalries.push(['', '']);
+            generateRivalryInputsUI();
+        }
+
+        function removeRivalry(index) {
+            rivalries.splice(index, 1);
+            generateRivalryInputsUI();
+        }
+
+        function autoGenerateRivalries() {
+            const maxRivalries = Math.floor(teams.length / 2);
+            rivalries = [];
+            
+            const availableTeams = [...teams];
+            availableTeams.sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < maxRivalries && i * 2 + 1 < availableTeams.length; i++) {
+                rivalries.push([availableTeams[i * 2], availableTeams[i * 2 + 1]]);
+            }
+            
+            generateRivalryInputsUI();
+        }
+
+        function generateRandomTeamNames() {
+            const randomNames = [
+                'Lightning', 'Thunder', 'Storm', 'Blaze', 'Frost', 'Venom', 'Phoenix', 'Dragon',
+                'Titans', 'Warriors', 'Knights', 'Spartans', 'Gladiators', 'Crusaders', 'Vikings', 'Pirates',
+                'Eagles', 'Hawks', 'Falcons', 'Ravens', 'Wolves', 'Bears', 'Lions', 'Tigers',
+                'Rockets', 'Comets', 'Meteors', 'Stars', 'Galaxy', 'Nebula', 'Cosmos', 'Orbit'
+            ];
+            
+            const shuffled = randomNames.sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < teams.length; i++) {
+                teams[i] = shuffled[i] || `Team ${i + 1}`;
+            }
+            
+            generateTeamInputsUI();
+            generateRivalryInputsUI();
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                teams = teams.map((_, i) => `Team ${i + 1}`);
+                rivalries = [];
+                generateTeamInputsUI();
+                generateRivalryInputsUI();
+                document.getElementById('scheduleOutput').style.display = 'none';
+                document.getElementById('statsCard').style.display = 'none';
+            }
+        }
+
+        function validateInputs() {
+            // Check if all teams are filled and unique
+            const validTeams = teams.filter(team => team && team.trim());
+            if (validTeams.length < teams.length) {
+                alert('Please enter names for all teams.');
+                return false;
+            }
+
+            const uniqueTeams = new Set(validTeams);
+            if (uniqueTeams.size !== validTeams.length) {
+                alert('Team names must be unique.');
+                return false;
+            }
+
+            // Check if we have even number of teams
+            if (teams.length % 2 !== 0) {
+                alert('Number of teams must be even for proper scheduling.');
+                return false;
+            }
+
+            // Validate rivalries if any exist
+            const validRivalries = rivalries.filter(rivalry => 
+                rivalry[0] && rivalry[1] && rivalry[0] !== rivalry[1]
+            );
+            
+            if (rivalries.length > 0 && validRivalries.length !== rivalries.length) {
+                alert('Please complete all rivalry configurations or remove incomplete ones.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Schedule generation functions (simplified for this example)
+        function generateSchedule() {
+            if (!validateInputs()) return;
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+
+            setTimeout(() => {
+                try {
+                    const schedule = createSchedule();
+                    currentSchedule = schedule;
+                    displaySchedule(schedule);
+                    updateStatistics(schedule);
+                } catch (error) {
+                    alert('Error generating schedule: ' + error.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic me-2"></i>Generate Schedule';
+                }
+            }, 500);
+        }
+
+        function createSchedule() {
+            const teamCount = teams.length;
+            const totalWeeks = scheduleConfig.totalWeeks;
+            const rivalryWeeks = scheduleConfig.rivalryWeeks;
+            
+            const schedule = {};
+            const gamesPerWeek = Math.floor(teamCount / 2);
+            
+            // Generate round robin matchups
+            const allMatchups = [];
+            for (let i = 0; i < teamCount; i++) {
+                for (let j = i + 1; j < teamCount; j++) {
+                    allMatchups.push([teams[i], teams[j]]);
+                }
+            }
+            
+            // Remove rivalry matchups from regular rotation
+            const rivalryPairs = rivalries.filter(r => r[0] && r[1]);
+            const rivalryKeys = new Set(rivalryPairs.map(pair => 
+                [pair[0], pair[1]].sort().join('|')
+            ));
+            
+            const regularMatchups = allMatchups.filter(matchup => 
+                !rivalryKeys.has(matchup.slice().sort().join('|'))
+            );
+            
+            // Shuffle regular matchups
+            regularMatchups.sort(() => Math.random() - 0.5);
+            
+            let matchupIndex = 0;
+            let currentWeek = 1;
+            
+            // Fill regular weeks
+            for (let week = 1; week <= totalWeeks; week++) {
+                // Skip rivalry weeks
+                if (week <= rivalryWeeks || week > totalWeeks - rivalryWeeks + 1) {
+                    if (rivalryPairs.length > 0) {
+                        schedule[week] = [...rivalryPairs];
+                        continue;
+                    }
+                }
+                
+                // Fill with regular matchups
+                const weekGames = [];
+                const usedTeams = new Set();
+                
+                while (weekGames.length < gamesPerWeek && matchupIndex < regularMatchups.length) {
+                    const matchup = regularMatchups[matchupIndex];
+                    
+                    if (!usedTeams.has(matchup[0]) && !usedTeams.has(matchup[1])) {
+                        weekGames.push(matchup);
+                        usedTeams.add(matchup[0]);
+                        usedTeams.add(matchup[1]);
+                    }
+                    
+                    matchupIndex++;
+                    
+                    // If we've gone through all matchups, start over
+                    if (matchupIndex >= regularMatchups.length) {
+                        matchupIndex = 0;
+                        regularMatchups.sort(() => Math.random() - 0.5);
+                    }
+                }
+                
+                schedule[week] = weekGames;
+            }
+            
+            return schedule;
+        }
+
+        function displaySchedule(schedule) {
+            const content = document.getElementById('scheduleContent');
+            content.innerHTML = '';
+            
+            Object.keys(schedule).sort((a, b) => parseInt(a) - parseInt(b)).forEach(week => {
+                const weekDiv = document.createElement('div');
+                weekDiv.className = 'schedule-week';
+                
+                const weekNum = parseInt(week);
+                let weekType = '';
+                if (weekNum <= scheduleConfig.rivalryWeeks) {
+                    weekType = ' (Rivalry Week)';
+                } else if (weekNum > scheduleConfig.totalWeeks - scheduleConfig.rivalryWeeks) {
+                    weekType = ' (Final Rivalry Week)';
+                } else {
+                    weekType = ' (Regular Season)';
+                }
+                
+                weekDiv.innerHTML = `
+                    <div class="schedule-week-header">
+                        <i class="fas fa-calendar-day me-2"></i>
+                        Week ${week}${weekType}
+                    </div>
+                    <div class="schedule-week-body">
+                        ${schedule[week].map((game, i) => `
+                            <div class="game-item">
+                                <span><strong>Game ${i + 1}:</strong></span>
+                                <div>
+                                    <span class="team-badge">${game[0]}</span>
+                                    <span class="vs-divider">VS</span>
+                                    <span class="team-badge">${game[1]}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                content.appendChild(weekDiv);
+            });
+            
+            document.getElementById('scheduleOutput').style.display = 'block';
+            document.getElementById('scheduleOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateStatistics(schedule) {
+            const totalGames = Object.values(schedule).reduce((sum, week) => sum + week.length, 0);
+            const weeksUsed = Object.keys(schedule).length;
+            const gamesPerTeam = Math.floor(totalGames * 2 / teams.length);
+            
+            const weeksPerRoundRobin = teams.length % 2 === 0 ? teams.length - 1 : teams.length;
+            const roundRobins = Math.floor((weeksUsed - scheduleConfig.rivalryWeeks) / weeksPerRoundRobin);
+            
+            document.getElementById('totalGamesCount').textContent = totalGames;
+            document.getElementById('roundRobinsCount').textContent = roundRobins.toFixed(1);
+            document.getElementById('gamesPerTeamCount').textContent = gamesPerTeam;
+            document.getElementById('weeksUsedCount').textContent = weeksUsed;
+            
+            document.getElementById('statsCard').style.display = 'block';
+        }
+
+        function downloadSchedule() {
+            if (!currentSchedule) return;
+            
+            let content = `# ${sportConfigs[scheduleConfig.sportType].name} Schedule\n\n`;
+            content += `## League Configuration\n`;
+            content += `- **Teams:** ${teams.length}\n`;
+            content += `- **Total Weeks:** ${scheduleConfig.totalWeeks}\n`;
+            content += `- **Rivalry Weeks:** ${scheduleConfig.rivalryWeeks}\n\n`;
+            
+            content += `## Teams\n`;
+            teams.forEach((team, i) => {
+                content += `${i + 1}. ${team}\n`;
+            });
+            
+            if (rivalries.length > 0) {
+                content += `\n## Rivalry Pairs\n`;
+                rivalries.forEach(rivalry => {
+                    content += `- ${rivalry[0]} vs ${rivalry[1]}\n`;
+                });
+            }
+            
+            content += `\n## Weekly Schedule\n\n`;
+            
+            Object.keys(currentSchedule).sort((a, b) => parseInt(a) - parseInt(b)).forEach(week => {
+                const weekNum = parseInt(week);
+                let weekType = '';
+                if (weekNum <= scheduleConfig.rivalryWeeks) {
+                    weekType = ' (Rivalry Week)';
+                } else if (weekNum > scheduleConfig.totalWeeks - scheduleConfig.rivalryWeeks) {
+                    weekType = ' (Final Rivalry Week)';
+                } else {
+                    weekType = ' (Regular Season)';
+                }
+                
+                content += `### Week ${week}${weekType}\n`;
+                currentSchedule[week].forEach((game, i) => {
+                    content += `- **Game ${i + 1}:** ${game[0]} vs ${game[1]}\n`;
+                });
+                content += '\n';
+            });
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${scheduleConfig.sportType}_schedule_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function printSchedule() {
+            if (!currentSchedule) return;
+            
+            const printContent = document.getElementById('scheduleContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Sports Schedule</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .schedule-week { margin-bottom: 20px; border: 1px solid #ddd; }
+                        .schedule-week-header { background: #f5f5f5; padding: 10px; font-weight: bold; }
+                        .schedule-week-body { padding: 10px; }
+                        .game-item { margin-bottom: 5px; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>${sportConfigs[scheduleConfig.sportType].name} Schedule</h1>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

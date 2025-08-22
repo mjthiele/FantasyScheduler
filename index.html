@@ -132,6 +132,11 @@
             font-size: 1rem;
         }
 
+        .schedule-week-header.bg-warning {
+            background: linear-gradient(90deg, var(--kt-warning) 0%, #ff8c00 100%);
+            color: var(--kt-gray-900);
+        }
+
         .schedule-week-body {
             padding: 1.5rem;
         }
@@ -312,8 +317,10 @@
                                 <input type="number" class="form-control" id="totalWeeks" value="14" min="4" max="30" onchange="calculateScheduleInfo()">
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Rivalry Weeks</label>
-                                <input type="number" class="form-control" id="rivalryWeeks" value="2" min="0" max="4" onchange="calculateScheduleInfo()">
+                                <label class="form-label">Rivalry Week Selection</label>
+                                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#rivalryWeekModal">
+                                    <i class="fas fa-calendar-alt me-2"></i>Select Rivalry Weeks
+                                </button>
                             </div>
                         </div>
 
@@ -321,6 +328,12 @@
                         <div class="alert alert-info" id="scheduleInfo">
                             <h6><i class="fas fa-info-circle me-2"></i>Schedule Information</h6>
                             <div id="scheduleDetails"></div>
+                        </div>
+
+                        <!-- Selected Rivalry Weeks Display -->
+                        <div class="alert alert-warning" id="rivalryWeeksDisplay" style="display: none;">
+                            <h6><i class="fas fa-sword me-2"></i>Selected Rivalry Weeks</h6>
+                            <div id="selectedWeeksText">No rivalry weeks selected</div>
                         </div>
                     </div>
                 </div>
@@ -448,6 +461,32 @@
         </div>
     </div>
 
+    <!-- Rivalry Week Selection Modal -->
+    <div class="modal fade" id="rivalryWeekModal" tabindex="-1" aria-labelledby="rivalryWeekModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rivalryWeekModalLabel">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        Select Rivalry Weeks
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4">Choose which weeks will be dedicated to rivalry matchups. During these weeks, only rivalry pairs will play against each other.</p>
+                    
+                    <div class="row" id="weekCheckboxContainer">
+                        <!-- Week checkboxes will be generated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRivalryWeeks()">Save Selection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 
@@ -455,11 +494,12 @@
         // Global variables
         let teams = [];
         let rivalries = [];
+        let selectedRivalryWeeks = [];
         let currentSchedule = null;
         let scheduleConfig = {
             teamCount: 12,
             totalWeeks: 14,
-            rivalryWeeks: 2,
+            rivalryWeeks: [],
             sportType: 'fantasy_football'
         };
 
@@ -469,31 +509,31 @@
                 name: 'Fantasy Football',
                 defaultTeams: ['Ders', 'Brock', 'Nick', 'Marc', 'Rick', 'Spencer', 'Matt', 'Eli', 'ben', 'Sam', 'Paul', 'Addi'],
                 defaultWeeks: 14,
-                defaultRivalryWeeks: 2
+                suggestedRivalryWeeks: [1, 14]
             },
             fantasy_baseball: {
                 name: 'Fantasy Baseball',
                 defaultTeams: ['Yankees', 'Red Sox', 'Dodgers', 'Giants', 'Cubs', 'Cardinals', 'Astros', 'Rangers', 'Braves', 'Phillies', 'Mets', 'Nationals'],
                 defaultWeeks: 22,
-                defaultRivalryWeeks: 2
+                suggestedRivalryWeeks: [1, 11, 22]
             },
             basketball: {
                 name: 'Fantasy Basketball',
                 defaultTeams: ['Lakers', 'Celtics', 'Warriors', 'Bulls', 'Heat', 'Spurs', 'Knicks', 'Nets', 'Mavs', 'Nuggets', 'Suns', 'Clippers'],
                 defaultWeeks: 20,
-                defaultRivalryWeeks: 2
+                suggestedRivalryWeeks: [1, 20]
             },
             soccer: {
                 name: 'Fantasy Soccer',
                 defaultTeams: ['Arsenal', 'Chelsea', 'Liverpool', 'ManCity', 'ManUnited', 'Tottenham', 'Newcastle', 'Brighton', 'Villa', 'West Ham', 'Wolves', 'Crystal Palace'],
                 defaultWeeks: 18,
-                defaultRivalryWeeks: 2
+                suggestedRivalryWeeks: [1, 18]
             },
             custom: {
                 name: 'Custom Sport',
                 defaultTeams: [],
                 defaultWeeks: 14,
-                defaultRivalryWeeks: 2
+                suggestedRivalryWeeks: [1, 14]
             }
         };
 
@@ -501,6 +541,7 @@
         function initializeApp() {
             updateSportDefaults();
             updateTeamInputs();
+            generateWeekCheckboxes();
             calculateScheduleInfo();
         }
 
@@ -512,12 +553,16 @@
             
             if (sportType !== 'custom') {
                 document.getElementById('totalWeeks').value = config.defaultWeeks;
-                document.getElementById('rivalryWeeks').value = config.defaultRivalryWeeks;
                 scheduleConfig.totalWeeks = config.defaultWeeks;
-                scheduleConfig.rivalryWeeks = config.defaultRivalryWeeks;
+                
+                // Set suggested rivalry weeks
+                selectedRivalryWeeks = [...config.suggestedRivalryWeeks];
+                scheduleConfig.rivalryWeeks = selectedRivalryWeeks;
+                updateRivalryWeeksDisplay();
             }
             
             updateTeamInputs();
+            generateWeekCheckboxes();
             calculateScheduleInfo();
         }
 
@@ -579,6 +624,59 @@
             }
         }
 
+        function generateWeekCheckboxes() {
+            const container = document.getElementById('weekCheckboxContainer');
+            container.innerHTML = '';
+            
+            const totalWeeks = parseInt(document.getElementById('totalWeeks').value);
+            
+            for (let week = 1; week <= totalWeeks; week++) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-3 col-sm-4 col-6 mb-2';
+                
+                const isSelected = selectedRivalryWeeks.includes(week);
+                
+                colDiv.innerHTML = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${week}" 
+                               id="week${week}" ${isSelected ? 'checked' : ''}>
+                        <label class="form-check-label" for="week${week}">
+                            Week ${week}
+                        </label>
+                    </div>
+                `;
+                
+                container.appendChild(colDiv);
+            }
+        }
+
+        function saveRivalryWeeks() {
+            const checkboxes = document.querySelectorAll('#weekCheckboxContainer input[type="checkbox"]:checked');
+            selectedRivalryWeeks = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            selectedRivalryWeeks.sort((a, b) => a - b);
+            
+            scheduleConfig.rivalryWeeks = selectedRivalryWeeks;
+            updateRivalryWeeksDisplay();
+            calculateScheduleInfo();
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('rivalryWeekModal'));
+            modal.hide();
+        }
+
+        function updateRivalryWeeksDisplay() {
+            const display = document.getElementById('rivalryWeeksDisplay');
+            const text = document.getElementById('selectedWeeksText');
+            
+            if (selectedRivalryWeeks.length > 0) {
+                text.textContent = `Weeks: ${selectedRivalryWeeks.join(', ')}`;
+                display.style.display = 'block';
+            } else {
+                text.textContent = 'No rivalry weeks selected';
+                display.style.display = 'none';
+            }
+        }
+
         function addRivalryInputUI(index, team1 = '', team2 = '') {
             const container = document.getElementById('rivalriesContainer');
             
@@ -621,37 +719,46 @@
         function calculateScheduleInfo() {
             const teamCount = parseInt(document.getElementById('teamCount').value);
             const totalWeeks = parseInt(document.getElementById('totalWeeks').value);
-            const rivalryWeeks = parseInt(document.getElementById('rivalryWeeks').value);
+            const rivalryWeeksCount = selectedRivalryWeeks.length;
             
             scheduleConfig.totalWeeks = totalWeeks;
-            scheduleConfig.rivalryWeeks = rivalryWeeks;
+            scheduleConfig.rivalryWeeks = selectedRivalryWeeks;
             
-            // Calculate round robin information
-            const gamesPerRoundRobin = (teamCount * (teamCount - 1)) / 2;
+            // Calculate matchups
+            const totalPossibleMatchups = (teamCount * (teamCount - 1)) / 2;
+            const rivalryMatchupsCount = rivalries.filter(r => r[0] && r[1]).length;
+            const roundRobinMatchups = totalPossibleMatchups - rivalryMatchupsCount;
+            
             const gamesPerWeek = Math.floor(teamCount / 2);
-            const weeksPerRoundRobin = teamCount % 2 === 0 ? teamCount - 1 : teamCount;
+            const regularWeeks = totalWeeks - rivalryWeeksCount;
+            const totalRegularGamesNeeded = regularWeeks * gamesPerWeek;
             
-            const availableWeeksForRoundRobin = totalWeeks - rivalryWeeks;
-            const completeRoundRobins = Math.floor(availableWeeksForRoundRobin / weeksPerRoundRobin);
-            const remainingWeeks = availableWeeksForRoundRobin % weeksPerRoundRobin;
+            // Calculate round robins needed
+            const completeRoundRobins = Math.floor(totalRegularGamesNeeded / roundRobinMatchups);
+            const remainingGamesAfterRoundRobins = totalRegularGamesNeeded - (completeRoundRobins * roundRobinMatchups);
             
-            const totalRoundRobinGames = completeRoundRobins * gamesPerRoundRobin + remainingWeeks * gamesPerWeek;
-            const rivalryGames = rivalryWeeks * Math.min(rivalries.length, gamesPerWeek);
-            const totalGames = totalRoundRobinGames + rivalryGames;
+            // Calculate if we need extra games (repeats)
+            const needsExtraGames = remainingGamesAfterRoundRobins > 0;
+            const maxGamesPerPair = completeRoundRobins + (needsExtraGames ? 1 : 0);
+            
+            const rivalryGames = rivalryWeeksCount * rivalryMatchupsCount;
+            const totalGames = totalRegularGamesNeeded + rivalryGames;
             const gamesPerTeam = Math.floor(totalGames * 2 / teamCount);
             
             // Update schedule info
             document.getElementById('scheduleDetails').innerHTML = `
                 <div class="row">
                     <div class="col-md-6">
-                        <small><strong>Round Robin Info:</strong></small><br>
-                        <small>• ${weeksPerRoundRobin} weeks per complete round robin</small><br>
+                        <small><strong>Round Robin Analysis:</strong></small><br>
+                        <small>• ${roundRobinMatchups} unique non-rivalry matchups</small><br>
                         <small>• ${completeRoundRobins} complete round robin(s)</small><br>
-                        <small>• ${remainingWeeks} partial weeks</small>
+                        <small>• ${remainingGamesAfterRoundRobins} extra games needed</small><br>
+                        <small>• Max ${maxGamesPerPair} games between any pair</small>
                     </div>
                     <div class="col-md-6">
                         <small><strong>Game Distribution:</strong></small><br>
                         <small>• ${gamesPerWeek} games per week</small><br>
+                        <small>• ${regularWeeks} regular weeks + ${rivalryWeeksCount} rivalry weeks</small><br>
                         <small>• ~${gamesPerTeam} games per team</small><br>
                         <small>• ${totalGames} total games</small>
                     </div>
@@ -783,12 +890,12 @@
         function createSchedule() {
             const teamCount = teams.length;
             const totalWeeks = scheduleConfig.totalWeeks;
-            const rivalryWeeks = scheduleConfig.rivalryWeeks;
-            
-            const schedule = {};
+            const rivalryWeeks = selectedRivalryWeeks;
             const gamesPerWeek = Math.floor(teamCount / 2);
             
-            // Generate round robin matchups
+            const schedule = {};
+            
+            // Step 1: Create all possible matchups
             const allMatchups = [];
             for (let i = 0; i < teamCount; i++) {
                 for (let j = i + 1; j < teamCount; j++) {
@@ -796,56 +903,99 @@
                 }
             }
             
-            // Remove rivalry matchups from regular rotation
+            // Step 2: Separate rivalry pairs from regular matchups
             const rivalryPairs = rivalries.filter(r => r[0] && r[1]);
             const rivalryKeys = new Set(rivalryPairs.map(pair => 
                 [pair[0], pair[1]].sort().join('|')
             ));
             
-            const regularMatchups = allMatchups.filter(matchup => 
+            const roundRobinMatchups = allMatchups.filter(matchup => 
                 !rivalryKeys.has(matchup.slice().sort().join('|'))
             );
             
-            // Shuffle regular matchups
-            regularMatchups.sort(() => Math.random() - 0.5);
+            // Step 3: Place rivalry games in designated weeks
+            rivalryWeeks.forEach(week => {
+                schedule[week] = [...rivalryPairs];
+            });
             
-            let matchupIndex = 0;
-            let currentWeek = 1;
-            
-            // Fill regular weeks
+            // Step 4: Calculate regular weeks and required games
+            const regularWeeks = [];
             for (let week = 1; week <= totalWeeks; week++) {
-                // Skip rivalry weeks
-                if (week <= rivalryWeeks || week > totalWeeks - rivalryWeeks + 1) {
-                    if (rivalryPairs.length > 0) {
-                        schedule[week] = [...rivalryPairs];
-                        continue;
+                if (!rivalryWeeks.includes(week)) {
+                    regularWeeks.push(week);
+                }
+            }
+            
+            const totalRegularGamesNeeded = regularWeeks.length * gamesPerWeek;
+            
+            // Step 5: Create game pool with proper distribution
+            const gamePool = [];
+            const matchupCounts = new Map();
+            
+            // Initialize matchup counts
+            roundRobinMatchups.forEach(matchup => {
+                const key = matchup.slice().sort().join('|');
+                matchupCounts.set(key, 0);
+            });
+            
+            // Add games to pool, respecting the max +1 constraint
+            let gamesAdded = 0;
+            let currentRound = 1;
+            
+            while (gamesAdded < totalRegularGamesNeeded) {
+                let addedThisRound = 0;
+                
+                // Shuffle matchups for this round
+                const shuffledMatchups = [...roundRobinMatchups];
+                shuffledMatchups.sort(() => Math.random() - 0.5);
+                
+                for (const matchup of shuffledMatchups) {
+                    const key = matchup.slice().sort().join('|');
+                    const currentCount = matchupCounts.get(key);
+                    
+                    // Allow up to (currentRound) games between any pair
+                    if (currentCount < currentRound && gamesAdded < totalRegularGamesNeeded) {
+                        gamePool.push([...matchup]);
+                        matchupCounts.set(key, currentCount + 1);
+                        gamesAdded++;
+                        addedThisRound++;
                     }
                 }
                 
-                // Fill with regular matchups
+                // If we couldn't add any games this round, move to next round
+                if (addedThisRound === 0) {
+                    currentRound++;
+                }
+                
+                // Safety break to prevent infinite loops
+                if (currentRound > 3) break;
+            }
+            
+            // Step 6: Distribute games across regular weeks
+            gamePool.sort(() => Math.random() - 0.5);
+            let gameIndex = 0;
+            
+            regularWeeks.forEach(week => {
                 const weekGames = [];
                 const usedTeams = new Set();
+                let attempts = 0;
                 
-                while (weekGames.length < gamesPerWeek && matchupIndex < regularMatchups.length) {
-                    const matchup = regularMatchups[matchupIndex];
+                // Try to fill the week with games
+                while (weekGames.length < gamesPerWeek && attempts < gamePool.length * 2) {
+                    const game = gamePool[gameIndex % gamePool.length];
+                    gameIndex++;
+                    attempts++;
                     
-                    if (!usedTeams.has(matchup[0]) && !usedTeams.has(matchup[1])) {
-                        weekGames.push(matchup);
-                        usedTeams.add(matchup[0]);
-                        usedTeams.add(matchup[1]);
-                    }
-                    
-                    matchupIndex++;
-                    
-                    // If we've gone through all matchups, start over
-                    if (matchupIndex >= regularMatchups.length) {
-                        matchupIndex = 0;
-                        regularMatchups.sort(() => Math.random() - 0.5);
+                    // Check if both teams are available this week
+                    if (!usedTeams.has(game[0]) && !usedTeams.has(game[1])) {
+                        weekGames.push([...game]);
+                        usedTeams.add(game[0]);
+                        usedTeams.add(game[1]);
                     }
                 }
                 
                 schedule[week] = weekGames;
-            }
+            });
             
             return schedule;
         }
@@ -860,16 +1010,17 @@
                 
                 const weekNum = parseInt(week);
                 let weekType = '';
-                if (weekNum <= scheduleConfig.rivalryWeeks) {
+                let headerClass = 'schedule-week-header';
+                
+                if (selectedRivalryWeeks.includes(weekNum)) {
                     weekType = ' (Rivalry Week)';
-                } else if (weekNum > scheduleConfig.totalWeeks - scheduleConfig.rivalryWeeks) {
-                    weekType = ' (Final Rivalry Week)';
+                    headerClass += ' bg-warning';
                 } else {
                     weekType = ' (Regular Season)';
                 }
                 
                 weekDiv.innerHTML = `
-                    <div class="schedule-week-header">
+                    <div class="${headerClass}">
                         <i class="fas fa-calendar-day me-2"></i>
                         Week ${week}${weekType}
                     </div>
@@ -899,8 +1050,13 @@
             const weeksUsed = Object.keys(schedule).length;
             const gamesPerTeam = Math.floor(totalGames * 2 / teams.length);
             
-            const weeksPerRoundRobin = teams.length % 2 === 0 ? teams.length - 1 : teams.length;
-            const roundRobins = Math.floor((weeksUsed - scheduleConfig.rivalryWeeks) / weeksPerRoundRobin);
+            // Calculate round robins more accurately
+            const rivalryPairs = rivalries.filter(r => r[0] && r[1]);
+            const totalPossibleMatchups = (teams.length * (teams.length - 1)) / 2;
+            const roundRobinMatchups = totalPossibleMatchups - rivalryPairs.length;
+            const regularWeeksCount = weeksUsed - selectedRivalryWeeks.length;
+            const regularGames = totalGames - (selectedRivalryWeeks.length * rivalryPairs.length);
+            const roundRobins = regularGames / roundRobinMatchups;
             
             document.getElementById('totalGamesCount').textContent = totalGames;
             document.getElementById('roundRobinsCount').textContent = roundRobins.toFixed(1);
@@ -917,7 +1073,7 @@
             content += `## League Configuration\n`;
             content += `- **Teams:** ${teams.length}\n`;
             content += `- **Total Weeks:** ${scheduleConfig.totalWeeks}\n`;
-            content += `- **Rivalry Weeks:** ${scheduleConfig.rivalryWeeks}\n\n`;
+            content += `- **Rivalry Weeks:** ${selectedRivalryWeeks.length > 0 ? selectedRivalryWeeks.join(', ') : 'None'}\n\n`;
             
             content += `## Teams\n`;
             teams.forEach((team, i) => {
@@ -936,10 +1092,8 @@
             Object.keys(currentSchedule).sort((a, b) => parseInt(a) - parseInt(b)).forEach(week => {
                 const weekNum = parseInt(week);
                 let weekType = '';
-                if (weekNum <= scheduleConfig.rivalryWeeks) {
+                if (selectedRivalryWeeks.includes(weekNum)) {
                     weekType = ' (Rivalry Week)';
-                } else if (weekNum > scheduleConfig.totalWeeks - scheduleConfig.rivalryWeeks) {
-                    weekType = ' (Final Rivalry Week)';
                 } else {
                     weekType = ' (Regular Season)';
                 }
